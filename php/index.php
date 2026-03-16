@@ -191,5 +191,39 @@ $app->post('/alunni/{id}/certificazioni', function (Request $request, Response $
 
     return $response->withHeader('Content-Type', 'application/json');
 });
+$app->put('/alunni/{id}/certificazioni/{id_cert}', function (Request $request, Response $response, $args) {
+
+    $conn = getConnection();
+    $id = (int)$args['id'];
+    $id_cert = (int)$args['id_cert'];
+    $data = $request->getParsedBody();
+
+    $stmt = $conn->prepare("UPDATE certificazioni SET titolo = ?, votazione = ? , ente = ? , alunno_id = ? WHERE id = ?");
+    $stmt->bind_param("sisi", $data['titolo'], $data['votazione'],$data['ente'], $id_cert);
+    $stmt->execute();
+
+    $response->getBody()->write(json_encode([
+        "message" => "certificazione aggiornata"
+    ]));
+
+    return $response->withHeader('Content-Type', 'application/json');
+});
+$app->delete('/alunni/{id}/certificazioni/{id_cert}', function (Request $request, Response $response, $args) {
+
+    $conn = getConnection();
+    $id = (int)$args['id'];
+    $id_cert = (int)$args['id_cert'];
+
+    $stmt = $conn->prepare("DELETE FROM certificazioni WHERE id = ? and alunno_id = ?");
+    $stmt->bind_param("ii",$id_cert ,$id);
+    $stmt->execute();
+
+    $response->getBody()->write(json_encode([
+        "message" => "certificazione eliminata"
+    ]));
+
+    return $response->withHeader('Content-Type', 'application/json');
+});
+
 
 $app->run();
